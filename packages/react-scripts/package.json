@@ -71,8 +71,18 @@
     "whatwg-fetch": "2.0.3"
   },
   "devDependencies": {
+    "history": "^4.7.2",
+    "prop-types": "^15.6.1",
     "react": "^16.0.0",
-    "react-dom": "^16.0.0"
+    "react-dom": "^16.0.0",
+    "react-hot-loader": "^4.0.1",
+    "react-loadable": "^5.3.1",
+    "react-redux": "^5.0.7",
+    "react-router": "^4.2.0",
+    "react-router-dom": "^4.2.2",
+    "react-router-redux": "^4.0.8",
+    "redux": "^3.7.2",
+    "redux-devtools-extension": "^2.13.2"
   },
   "optionalDependencies": {
     "fsevents": "^1.1.3"
