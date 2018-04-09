@@ -15,8 +15,11 @@ const url = require('url');
 // Make sure any symlinks in the project folder are resolved:
 // https://github.com/facebookincubator/create-react-app/issues/637
 const appDirectory = fs.realpathSync(process.cwd());
-const resolveApp = relativePath => {
-  const p = path.resolve(appDirectory, relativePath);
+const resolveApp = (relativePath, customRelativePath = undefined) => {
+  const p = path.resolve(
+    appDirectory,
+    customRelativePath ? customRelativePath : relativePath
+  );
   return fs.existsSync(p) && p;
 };
 
@@ -53,16 +56,26 @@ const resolveOwn = relativePath => path.resolve(__dirname, '..', relativePath);
 
 // config before eject: we're in ./node_modules/react-scripts/config/
 module.exports = {
-  dotenv: resolveApp('.env'),
+  dotenv: resolveApp('.env', process.env.npm_package_config_paths_dotenv),
   appPath: resolveApp('.'),
-  appBuild: resolveApp('build'),
-  appPublic: resolveApp('public'),
-  appHtml: resolveApp('public/index.html'),
-  appIndex: resolveApp('src/index.js') || resolveApp('src/index.ts'),
+  appBuild: resolveApp('build', process.env.npm_package_config_paths_appBuild),
+  appPublic: resolveApp(
+    'public',
+    process.env.npm_package_config_paths_appPublic
+  ),
+  appHtml: resolveApp(
+    'public/index.html',
+    process.env.npm_package_config_paths_appHtml
+  ),
+  appIndex:
+    resolveApp('src/index.js', process.env.npm_package_config_paths_appIndex) ||
+    resolveApp('src/index.ts', process.env.npm_package_config_paths_appIndex),
   appPackageJson: resolveApp('package.json'),
-  appSrc: resolveApp('src'),
-  yarnLockFile: resolveApp('yarn.lock'),
-  testsSetup: resolveApp('src/setupTests.js'),
+  appSrc: resolveApp('src', process.env.npm_package_config_paths_appSrc),
+  testsSetup: resolveApp(
+    'src/setupTests.js',
+    process.env.npm_package_config_paths_testsSetup
+  ),
   appNodeModules: resolveApp('node_modules'),
   publicUrl: getPublicUrl(resolveApp('package.json')),
   servedPath: getServedPath(resolveApp('package.json')),
