@@ -99,7 +99,20 @@ module.exports = function(
     command = 'npm';
     args = ['install', '--save', verbose && '--verbose'].filter(e => e);
   }
-  args.push('react', 'react-dom', 'react-hot-loader');
+  args.push(
+    'react',
+    'react-dom',
+    'react-hot-loader',
+    'react-loadable',
+    'react-router',
+    'react-router-dom',
+    'react-router-redux',
+    'react-redux',
+    'redux',
+    'redux-devtools-extension',
+    'history',
+    'prop-types'
+  );
 
   // Install additional template dependencies, if present
   const templateDependenciesPath = path.join(
