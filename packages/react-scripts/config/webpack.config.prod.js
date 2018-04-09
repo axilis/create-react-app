@@ -96,7 +96,18 @@ module.exports = {
     // https://github.com/facebookincubator/create-react-app/issues/290
     // `web` extension prefixes have been added for better support
     // for React Native Web.
-    extensions: ['.web.js', '.mjs', '.js', '.json', '.web.jsx', '.jsx'],
+    extensions: [
+      '.web.js', 
+      '.mjs', 
+      '.js', 
+      '.json', 
+      '.web.jsx', 
+      '.jsx', 
+      '.web.ts',
+      '.ts',
+      '.web.tsx',
+      '.tsx'
+    ],
     alias: {
       // @remove-on-eject-begin
       // Resolve Babel runtime relative to react-scripts.
@@ -153,6 +164,16 @@ module.exports = {
         include: paths.appSrc,
       },
       {
+        test: /\.(ts|tsx)$/,
+        include: paths.srcPaths,
+        exclude: [/[/\\\\]node_modules[/\\\\]/],
+        enforce: 'pre',
+        loader: require.resolve('tslint-loader'),
+        options: {
+          configFile: require.resolve('tslint-react/tslint-react.json'),
+        },
+      },
+      {
         // "oneOf" will traverse all following loaders until one will
         // match the requirements. When no loader matches it will fall
         // back to the "file" loader at the end of the loader list.
@@ -179,6 +200,17 @@ module.exports = {
               // @remove-on-eject-end
               compact: true,
             },
+          },
+          // Compile .ts?
+          {
+            test: /\.(ts|tsx)$/,
+            include: paths.srcPaths,
+            exclude: [/[/\\\\]node_modules[/\\\\]/],
+            use: [
+              {
+                loader: require.resolve('ts-loader'),
+              },
+            ],
           },
           // The notation here is somewhat confusing.
           // "postcss" loader applies autoprefixer to our CSS.
