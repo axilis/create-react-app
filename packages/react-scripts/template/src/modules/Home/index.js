@@ -12,8 +12,8 @@ class Home extends Component {
           <h1 className="Home-title">Welcome to React</h1>
         </header>
         <p className="Home-intro">
-          To get started, edit <code>src/module/Home/index.js</code> and save to
-          reload.
+          To get started, edit <code>src/modules/Home/index.js</code> and save
+          to reload.
         </p>
       </div>
     );
