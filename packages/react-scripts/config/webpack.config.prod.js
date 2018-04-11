@@ -21,6 +21,7 @@ const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
 const paths = require('./paths');
 const getClientEnvironment = require('./env');
 const PrerenderSPAPlugin = require('prerender-spa-plugin');
+const appPackage = require(paths.appPackageJson);
 
 // Webpack uses `publicPath` to determine where the app is being served from.
 // It requires a trailing slash, or the file assets will get an incorrect path.
@@ -55,24 +56,6 @@ const extractTextPluginOptions = shouldUseRelativeAssetPaths
     { publicPath: Array(cssFilename.split('/').length).join('../') }
   : {};
 
-// Options for PostCSS as we reference these options twice
-// Adds vendor prefixing based on your specified browser support in
-// package.json
-const postCSSLoaderOptions = {
-  // Necessary for external CSS imports to work
-  // https://github.com/facebook/create-react-app/issues/2677
-  ident: 'postcss',
-  plugins: () => [
-    require('postcss-flexbugs-fixes'),
-    autoprefixer({
-      flexbox: 'no-2009',
-    }),
-  ],
-};
-
-// package.json
-const appPackage = require(paths.appPackageJson);
-
 // This is the production configuration.
 // It compiles slowly and is focused on producing a fast and minimal bundle.
 // The development configuration is different and lives in a separate file.
@@ -83,7 +66,7 @@ module.exports = {
   // You can exclude the *.map files from the build during deployment.
   devtool: shouldUseSourceMap ? 'source-map' : false,
   // In production, we only want to load the polyfills and the app code.
-  entry: [require.resolve('./polyfills'), paths.appIndex],
+  entry: [require.resolve('./polyfills'), paths.appIndexJs],
   output: {
     // The build folder.
     path: paths.appBuild,
@@ -115,32 +98,22 @@ module.exports = {
     // https://github.com/facebookincubator/create-react-app/issues/290
     // `web` extension prefixes have been added for better support
     // for React Native Web.
-    extensions: [
-      '.web.js',
-      '.mjs',
-      '.js',
-      '.json',
-      '.web.jsx',
-      '.jsx',
-      '.web.ts',
-      '.ts',
-      '.web.tsx',
-      '.tsx'
-    ],
-    alias: Object.assign(
-      {
-        // Resolve Babel runtime relative to react-scripts.
-        // It usually still works on npm 3 without this but it would be
-        // unfortunate to rely on, as react-scripts could be symlinked,
-        // and thus @babel/runtime might not be resolvable from the source.
-        '@babel/runtime': path.dirname(
-          require.resolve('@babel/runtime/package.json')
-        ),
-        // Support React Native Web
-        // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
-        'react-native': 'react-native-web',
+    extensions: ['.web.js', '.mjs', '.js', '.json', '.web.jsx', '.jsx', '.web.ts', '.ts', '.web.tsx', '.tsx'],
+    alias: Object.assign({
+      // @remove-on-eject-begin
+      // Resolve Babel runtime relative to react-scripts.
+      // It usually still works on npm 3 without this but it would be
+      // unfortunate to rely on, as react-scripts could be symlinked,
+      // and thus babel-runtime might not be resolvable from the source.
+      'babel-runtime': path.dirname(
+        require.resolve('babel-runtime/package.json')
+      ),
+      // @remove-on-eject-end
+      // Support React Native Web
+      // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
+      'react-native': 'react-native-web',
       },
-      appPackage.aliases || {}
+      appPackage.config.aliases || {}
     ),
     plugins: [
       // Prevents users from importing files from outside of src/ (or node_modules/).
@@ -185,7 +158,7 @@ module.exports = {
       },
       {
         test: /\.(ts|tsx)$/,
-        include: paths.srcPaths,
+        include: paths.appSrc,
         exclude: [/[/\\\\]node_modules[/\\\\]/],
         enforce: 'pre',
         loader: require.resolve('tslint-loader'),
@@ -224,7 +197,7 @@ module.exports = {
           // Compile .ts?
           {
             test: /\.(ts|tsx)$/,
-            include: paths.srcPaths,
+            include: paths.appSrc,
             exclude: [/[/\\\\]node_modules[/\\\\]/],
             use: [
               {
@@ -266,7 +239,23 @@ module.exports = {
                     },
                     {
                       loader: require.resolve('postcss-loader'),
-                      options: postCSSLoaderOptions,
+                      options: {
+                        // Necessary for external CSS imports to work
+                        // https://github.com/facebookincubator/create-react-app/issues/2677
+                        ident: 'postcss',
+                        plugins: () => [
+                          require('postcss-flexbugs-fixes'),
+                          autoprefixer({
+                            browsers: [
+                              '>1%',
+                              'last 4 versions',
+                              'Firefox ESR',
+                              'not ie < 9', // React doesn't support IE8 anyway
+                            ],
+                            flexbox: 'no-2009',
+                          }),
+                        ],
+                      },
                     },
                   ],
                 },
@@ -298,7 +287,23 @@ module.exports = {
                     },
                     {
                       loader: require.resolve('postcss-loader'),
-                      options: postCSSLoaderOptions,
+                      options: {
+                        // Necessary for external CSS imports to work
+                        // https://github.com/facebookincubator/create-react-app/issues/2677
+                        ident: 'postcss',
+                        plugins: () => [
+                          require('postcss-flexbugs-fixes'),
+                          autoprefixer({
+                            browsers: [
+                              '>1%',
+                              'last 4 versions',
+                              'Firefox ESR',
+                              'not ie < 9', // React doesn't support IE8 anyway
+                            ],
+                            flexbox: 'no-2009',
+                          }),
+                        ],
+                      },
                     },
                     {
                       loader: require.resolve('sass-loader'),
@@ -333,34 +338,6 @@ module.exports = {
                     },
                     {
                       loader: require.resolve('postcss-loader'),
-                      options: postCSSLoaderOptions,
-                    },
-                    {
-                      loader: require.resolve('less-loader'),
-                    },
-                  ],
-                },
-                extractTextPluginOptions
-              )
-            ),
-            // Note: this won't work without `new ExtractTextPlugin()` in `plugins`.
-          },
-          // Adds support for CSS Modules (https://github.com/css-modules/css-modules)
-          // using the extension .module.css
-          {
-            test: /\.module\.css$/,
-            loader: ExtractTextPlugin.extract(
-              Object.assign(
-                {
-                  fallback: {
-                    loader: require.resolve('style-loader'),
-                    options: {
-                      hmr: false,
-                    },
-                  },
-                  use: [
-                    {
-                      loader: require.resolve('css-loader'),
                       options: {
                         // Necessary for external CSS imports to work
                         // https://github.com/facebookincubator/create-react-app/issues/2677
@@ -378,6 +355,9 @@ module.exports = {
                           }),
                         ],
                       },
+                    },
+                    {
+                      loader: require.resolve('less-loader'),
                     },
                   ],
                 },
@@ -507,7 +487,7 @@ module.exports = {
       // Required - The path to the webpack-outputted app to prerender.
       staticDir: paths.appBuild,
       // Required - Routes to render.
-      routes: appPackage.aliases.routes,
+      routes: appPackage.config.routes,
     }),
   ],
   // Some libraries import Node modules but don't use them in the browser.

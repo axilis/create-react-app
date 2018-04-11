@@ -19,6 +19,7 @@ const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
 const getClientEnvironment = require('./env');
 const paths = require('./paths');
+const appPackage = require(paths.appPackageJson);
 
 // Webpack uses `publicPath` to determine where the app is being served from.
 // In development, we always serve from the root. This makes config easier.
@@ -29,24 +30,6 @@ const publicPath = '/';
 const publicUrl = '';
 // Get environment variables to inject into our app.
 const env = getClientEnvironment(publicUrl);
-
-// Options for PostCSS as we reference these options twice
-// Adds vendor prefixing based on your specified browser support in
-// package.json
-const postCSSLoaderOptions = {
-  // Necessary for external CSS imports to work
-  // https://github.com/facebook/create-react-app/issues/2677
-  ident: 'postcss',
-  plugins: () => [
-    require('postcss-flexbugs-fixes'),
-    autoprefixer({
-      flexbox: 'no-2009',
-    }),
-  ],
-};
-
-// package.json
-const appPackage = require(paths.appPackageJson);
 
 // This is the development configuration.
 // It is focused on developer experience and fast rebuilds.
@@ -73,7 +56,7 @@ module.exports = {
     // require.resolve('webpack/hot/dev-server'),
     require.resolve('react-dev-utils/webpackHotDevClient'),
     // Finally, this is your app's code:
-    paths.appIndex,
+    paths.appIndexJs,
     // We include the app code last so that if there is a runtime error during
     // initialization, it doesn't blow up the WebpackDevServer client, and
     // changing JS code would still trigger a refresh.
@@ -108,32 +91,22 @@ module.exports = {
     // https://github.com/facebookincubator/create-react-app/issues/290
     // `web` extension prefixes have been added for better support
     // for React Native Web.
-    extensions: [
-      '.web.js',
-      '.mjs',
-      '.js',
-      '.json',
-      '.web.jsx',
-      '.jsx',
-      '.web.ts',
-      '.ts',
-      '.web.tsx',
-      '.tsx'
-    ],
-    alias: Object.assign(
-      {
-        // Resolve Babel runtime relative to react-scripts.
-        // It usually still works on npm 3 without this but it would be
-        // unfortunate to rely on, as react-scripts could be symlinked,
-        // and thus @babel/runtime might not be resolvable from the source.
-        '@babel/runtime': path.dirname(
-          require.resolve('@babel/runtime/package.json')
-        ),
-        // Support React Native Web
-        // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
-        'react-native': 'react-native-web',
+    extensions: ['.web.js', '.mjs', '.js', '.json', '.web.jsx', '.jsx', '.web.ts', '.ts', '.web.tsx', '.tsx'],
+    alias: Object.assign({
+      // @remove-on-eject-begin
+      // Resolve Babel runtime relative to react-scripts.
+      // It usually still works on npm 3 without this but it would be
+      // unfortunate to rely on, as react-scripts could be symlinked,
+      // and thus babel-runtime might not be resolvable from the source.
+      'babel-runtime': path.dirname(
+        require.resolve('babel-runtime/package.json')
+      ),
+      // @remove-on-eject-end
+      // Support React Native Web
+      // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
+      'react-native': 'react-native-web',
       },
-      appPackage.aliases || {}
+      appPackage.config.aliases || {}
     ),
     plugins: [
       // Prevents users from importing files from outside of src/ (or node_modules/).
@@ -176,7 +149,7 @@ module.exports = {
       },
       {
         test: /\.(ts|tsx)$/,
-        include: paths.srcPaths,
+        include: paths.appSrc,
         exclude: [/[/\\\\]node_modules[/\\\\]/],
         enforce: 'pre',
         loader: require.resolve('tslint-loader'),
@@ -203,42 +176,29 @@ module.exports = {
           // Process JS with Babel.
           {
             test: /\.(js|jsx|mjs)$/,
-            include: paths.srcPaths,
-            exclude: [/[/\\\\]node_modules[/\\\\]/],
-            use: [
-              {
-                loader: require.resolve('babel-loader'),
-                options: {
-                  babelrc: false,
-                  presets: [require.resolve('babel-preset-react-app')],
-                  plugins: [
-                    require.resolve('react-hot-loader/babel'),
-                    [
-                      require.resolve('babel-plugin-named-asset-import'),
-                      {
-                        loaderMap: {
-                          svg: {
-                            ReactComponent: 'svgr/webpack![path]',
-                          },
-                        },
-                      },
-                    ],
-                  ],
-                  // This is a feature of `babel-loader` for webpack (not Babel itself).
-                  // It enables caching results in ./node_modules/.cache/babel-loader/
-                  // directory for faster rebuilds.
-                  cacheDirectory: true,
-                  highlightCode: true,
-                },
-              },
-            ],
+            include: paths.appSrc,
+            loader: require.resolve('babel-loader'),
+            options: {
+              // @remove-on-eject-begin
+              babelrc: false,
+              presets: [require.resolve('babel-preset-react-app')],
+              plugins: [require.resolve('react-hot-loader/babel')],
+              // @remove-on-eject-end
+              // This is a feature of `babel-loader` for webpack (not Babel itself).
+              // It enables caching results in ./node_modules/.cache/babel-loader/
+              // directory for faster rebuilds.
+              cacheDirectory: true,
+            },
           },
           // Compile .ts?
           {
             test: /\.(ts|tsx)$/,
-            include: paths.srcPaths,
+            include: paths.appSrc,
             exclude: [/[/\\\\]node_modules[/\\\\]/],
             use: [
+              {
+                loader: require.resolve('ts-loader'),
+              },
               {
                 loader: require.resolve('babel-loader'),
                 options: {
@@ -248,11 +208,7 @@ module.exports = {
                   // It enables caching results in ./node_modules/.cache/babel-loader/
                   // directory for faster rebuilds.
                   cacheDirectory: true,
-                  highlightCode: true,
                 },
-              },
-              {
-                loader: require.resolve('ts-loader'),
               },
             ],
           },
@@ -273,7 +229,23 @@ module.exports = {
               },
               {
                 loader: require.resolve('postcss-loader'),
-                options: postCSSLoaderOptions,
+                options: {
+                  // Necessary for external CSS imports to work
+                  // https://github.com/facebookincubator/create-react-app/issues/2677
+                  ident: 'postcss',
+                  plugins: () => [
+                    require('postcss-flexbugs-fixes'),
+                    autoprefixer({
+                      browsers: [
+                        '>1%',
+                        'last 4 versions',
+                        'Firefox ESR',
+                        'not ie < 9', // React doesn't support IE8 anyway
+                      ],
+                      flexbox: 'no-2009',
+                    }),
+                  ],
+                },
               },
             ],
           },
@@ -290,7 +262,23 @@ module.exports = {
               },
               {
                 loader: require.resolve('postcss-loader'),
-                options: postCSSLoaderOptions,
+                options: {
+                  // Necessary for external CSS imports to work
+                  // https://github.com/facebookincubator/create-react-app/issues/2677
+                  ident: 'postcss',
+                  plugins: () => [
+                    require('postcss-flexbugs-fixes'),
+                    autoprefixer({
+                      browsers: [
+                        '>1%',
+                        'last 4 versions',
+                        'Firefox ESR',
+                        'not ie < 9', // React doesn't support IE8 anyway
+                      ],
+                      flexbox: 'no-2009',
+                    }),
+                  ],
+                },
               },
               {
                 loader: require.resolve('sass-loader'),
@@ -310,21 +298,6 @@ module.exports = {
               },
               {
                 loader: require.resolve('postcss-loader'),
-                options: postCSSLoaderOptions,
-              },
-              {
-                loader: require.resolve('less-loader'),
-              },
-            ],
-          },
-          // Adds support for CSS Modules (https://github.com/css-modules/css-modules)
-          // using the extension .module.css
-          {
-            test: /\.module\.css$/,
-            use: [
-              require.resolve('style-loader'),
-              {
-                loader: require.resolve('css-loader'),
                 options: {
                   // Necessary for external CSS imports to work
                   // https://github.com/facebookincubator/create-react-app/issues/2677
@@ -342,6 +315,9 @@ module.exports = {
                     }),
                   ],
                 },
+              },
+              {
+                loader: require.resolve('less-loader'),
               },
             ],
           },

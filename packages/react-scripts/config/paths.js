@@ -15,13 +15,10 @@ const url = require('url');
 // Make sure any symlinks in the project folder are resolved:
 // https://github.com/facebookincubator/create-react-app/issues/637
 const appDirectory = fs.realpathSync(process.cwd());
-const resolveApp = (relativePath, customRelativePath = undefined) => {
-  const p = path.resolve(
-    appDirectory,
-    customRelativePath ? customRelativePath : relativePath
-  );
-  return fs.existsSync(p) && p;
-};
+const resolveApp = (...relativePaths) => relativePaths
+  .filter(p => p)
+  .map(p => path.resolve(appDirectory, p))
+  .find(p => fs.existsSync(p));
 
 const envPublicUrl = process.env.PUBLIC_URL;
 
@@ -52,30 +49,36 @@ function getServedPath(appPackageJson) {
   return ensureSlash(servedUrl, true);
 }
 
+// config after eject: we're in ./config/
+module.exports = {
+  dotenv: resolveApp('.env'),
+  appBuild: resolveApp('build'),
+  appPublic: resolveApp('public'),
+  appHtml: resolveApp('public/index.html'),
+  appIndexJs: resolveApp('src/index.js'),
+  appPackageJson: resolveApp('package.json'),
+  appSrc: resolveApp('src'),
+  yarnLockFile: resolveApp('yarn.lock'),
+  testsSetup: resolveApp('src/setupTests.js'),
+  appNodeModules: resolveApp('node_modules'),
+  publicUrl: getPublicUrl(resolveApp('package.json')),
+  servedPath: getServedPath(resolveApp('package.json')),
+};
+
+// @remove-on-eject-begin
 const resolveOwn = relativePath => path.resolve(__dirname, '..', relativePath);
 
 // config before eject: we're in ./node_modules/react-scripts/config/
 module.exports = {
-  dotenv: resolveApp('.env', process.env.npm_package_config_paths_dotenv),
+  dotenv: resolveApp(process.env.npm_package_config_paths_dotenv, '.env'),
   appPath: resolveApp('.'),
-  appBuild: resolveApp('build', process.env.npm_package_config_paths_appBuild),
-  appPublic: resolveApp(
-    'public',
-    process.env.npm_package_config_paths_appPublic
-  ),
-  appHtml: resolveApp(
-    'public/index.html',
-    process.env.npm_package_config_paths_appHtml
-  ),
-  appIndex:
-    resolveApp('src/index.js', process.env.npm_package_config_paths_appIndex) ||
-    resolveApp('src/index.ts', process.env.npm_package_config_paths_appIndex),
+  appBuild: resolveApp(process.env.npm_package_config_paths_appBuild, 'build'),
+  appPublic: resolveApp(process.env.npm_package_config_paths_appPublic, 'public'),
+  appHtml: resolveApp(process.env.npm_package_config_paths_appHtml, 'public/index.html'),
+  appIndex: resolveApp(process.env.npm_package_config_paths_appIndex, 'src/index.js', 'src/index.ts'),
   appPackageJson: resolveApp('package.json'),
-  appSrc: resolveApp('src', process.env.npm_package_config_paths_appSrc),
-  testsSetup: resolveApp(
-    'src/setupTests.js',
-    process.env.npm_package_config_paths_testsSetup
-  ),
+  appSrc: resolveApp(process.env.npm_package_config_paths_appSrc, 'src'),
+  testsSetup: resolveApp(process.env.npm_package_config_paths_testsSetup, 'src/setupTests.js'),
   appNodeModules: resolveApp('node_modules'),
   publicUrl: getPublicUrl(resolveApp('package.json')),
   servedPath: getServedPath(resolveApp('package.json')),
