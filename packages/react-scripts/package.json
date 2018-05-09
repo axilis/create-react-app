@@ -3,7 +3,7 @@
     "access": "public"
   },
   "name": "@axilis/react-scripts",
-  "version": "0.1.0",
+  "version": "0.1.0-prerelease",
   "description": "Configuration and scripts for Create React App.",
   "repository": "axilis/create-react-app",
   "license": "MIT",
