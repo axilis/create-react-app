@@ -104,7 +104,7 @@ module.exports = function(
     'react-loadable',
     'react-router',
     'react-router-dom',
-    'react-router-redux',
+    'react-router-redux@next',
     'react-redux',
     'redux',
     'redux-devtools-extension',
