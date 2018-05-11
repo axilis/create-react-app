@@ -34,7 +34,7 @@ const env = getClientEnvironment(publicUrl);
 const config = appPackage.config || {};
 
 const resolveAliases = (aliases) => {
-  if (!aliases) return {};
+  if (!aliases) { return {}; }
   return Object.assign(
     ...Object.keys(aliases).map(([k]) => ({[k]: path.resolve(paths.appPath, aliases[k])}))
   );
