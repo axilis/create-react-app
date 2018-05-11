@@ -33,6 +33,13 @@ const env = getClientEnvironment(publicUrl);
 // Custom configuration
 const config = appPackage.config || {};
 
+const resolveAliases = (aliases) => {
+  if (!aliases) return {};
+  return Object.assign(
+    ...Object.keys(aliases).map(([k]) => ({[k]: path.resolve(paths.appPath, aliases[k])}))
+  );
+}
+
 // This is the development configuration.
 // It is focused on developer experience and fast rebuilds.
 // The production configuration is different and lives in a separate file.
@@ -108,7 +115,7 @@ module.exports = {
       // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
       'react-native': 'react-native-web',
       },
-      config.aliases || {}
+      resolveAliases(config.aliases)
     ),
     plugins: [
       // Prevents users from importing files from outside of src/ (or node_modules/).
