@@ -54,7 +54,6 @@ module.exports = {
   dotenv: resolveApp('.env'),
   appBuild: resolveApp('build'),
   appPublic: resolveApp('public'),
-  appHtml: resolveApp('public/index.html'),
   appIndexJs: resolveApp('src/index.js'),
   appPackageJson: resolveApp('package.json'),
   appSrc: resolveApp('src'),
@@ -68,13 +67,12 @@ module.exports = {
 // @remove-on-eject-begin
 const resolveOwn = relativePath => path.resolve(__dirname, '..', relativePath);
 
-// config before eject: we're in ./node_modules/react-scripts/config/
+// config before eject: we're in ./node_modules/node-scripts/config/
 module.exports = {
   dotenv: resolveApp(process.env.npm_package_config_paths_dotenv, '.env'),
   appPath: resolveApp('.'),
   appBuild: resolveApp(process.env.npm_package_config_paths_appBuild, 'build'),
   appPublic: resolveApp(process.env.npm_package_config_paths_appPublic, 'public'),
-  appHtml: resolveApp(process.env.npm_package_config_paths_appHtml, 'public/index.html'),
   appIndex: resolveApp(process.env.npm_package_config_paths_appIndex, 'src/index.js', 'src/index.ts'),
   appPackageJson: resolveApp('package.json'),
   appSrc: resolveApp(process.env.npm_package_config_paths_appSrc, 'src'),
@@ -88,22 +86,21 @@ module.exports = {
 };
 
 const ownPackageJson = require('../package.json');
-const reactScriptsPath = resolveApp(`node_modules/${ownPackageJson.name}`);
-const reactScriptsLinked =
-  fs.existsSync(reactScriptsPath) &&
-  fs.lstatSync(reactScriptsPath).isSymbolicLink();
+const nodeScriptsPath = resolveApp(`node_modules/${ownPackageJson.name}`);
+const nodeScriptsLinked =
+  fs.existsSync(nodeScriptsPath) &&
+  fs.lstatSync(nodeScriptsPath).isSymbolicLink();
 
-// config before publish: we're in ./packages/react-scripts/config/
+// config before publish: we're in ./packages/node-scripts/config/
 if (
-  !reactScriptsLinked &&
-  __dirname.indexOf(path.join('packages', 'react-scripts', 'config')) !== -1
+  !nodeScriptsLinked &&
+  __dirname.indexOf(path.join('packages', 'node-scripts', 'config')) !== -1
 ) {
   module.exports = {
     dotenv: resolveOwn('template/.env'),
     appPath: resolveApp('.'),
     appBuild: resolveOwn('../../build'),
     appPublic: resolveOwn('template/public'),
-    appHtml: resolveOwn('template/public/index.html'),
     appIndex:
       resolveOwn('template/src/index.js') ||
       resolveOwn('template/src/index.ts'),
