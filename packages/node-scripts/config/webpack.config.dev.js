@@ -345,7 +345,7 @@ module.exports = {
     new StartServerPlugin({
       name: 'index.js',
       nodeArgs: ['--inspect'], // allow debugging
-      signal: false, // signal to send for HMR (defaults to `false`, uses 'SIGUSR2' if `true`)
+      signal: true, // signal to send for HMR (defaults to `false`, uses 'SIGUSR2' if `true`)
       keyboard: true, // Allow typing 'rs' to restart the server. default: only if NODE_ENV is 'development'
     }),
   ],
