@@ -100,16 +100,14 @@ module.exports = function(
     args = ['install', '--save', verbose && '--verbose'].filter(e => e);
   }
   args.push(
-    'react-hot-loader',
-    'react-loadable',
-    'react-router',
-    'react-router-dom',
-    'react-router-redux@next',
-    'react-redux',
-    'redux',
-    'redux-devtools-extension',
-    'history',
-    'prop-types'
+    'body-parser',
+    'compression',
+    'express',
+    'express-winston',
+    'passport',
+    'raven',
+    'winston',
+    'winston-raven-sentry'
   );
 
   // Install additional template dependencies, if present
